@@ -15,8 +15,7 @@ describe('Testing Usuarios Crud in MongoDB', () => {
         jest.resetModules();
         process.env = {
             ...env,
-            MONGODB_URI:
-                'mongodb+srv://root:jonamtv3d@cluster0.6qutjmo.mongodb.net/?retryWrites=true&w=majority',
+            MONGODB_URI: '',
             MONGODB_DB: 'sw202202_test',
             MONGODB_SETUP: 1,
         };
