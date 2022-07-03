@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Usuario = require('../../../../libs/usuarios');
-const UsuarioDao = require('../../../../dao/mongodb/models/CategoryDao');
+const UsuarioDao = require('../../../../dao/mongodb/models/UsuarioDao');
 const userDao = new UsuarioDao();
 const user = new Usuario(userDao);
 user.init();
@@ -10,7 +10,7 @@ router.get('/', async (req, res) => {
     // extraer y validar datos del request
     try {
         // devolver la ejecución el controlador de esta ruta
-        const versionData = await user.getVersion();
+        const versionData = await user.getUsuarios();
         return res.status(200).json(versionData);
     } catch (ex) {
         // manejar el error que pueda tirar el controlador
@@ -33,11 +33,11 @@ router.get('/byid/:codigo', async (req, res) => {
     try {
         const { codigo } = req.params;
 
-        if (!'/^(d+)|([da-f]{24}$/'.test(codigo)) {
-            return res.status(400).json({
-                error: 'Se espera un codigo numérico',
-            });
+        if (!codigo || codigo.length < 13) {
+            const error = new Error('Se requiere un id válido');
+            return res.status(400).json({ msg: error.message });
         }
+
         const registro = await user.getUsuarioById({ codigo });
         return res.status(200).json(registro);
     } catch (ex) {

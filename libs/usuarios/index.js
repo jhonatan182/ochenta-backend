@@ -14,11 +14,11 @@ module.exports = class Usuario {
         await this.usuarioDao.init();
         await this.usuarioDao.setup();
     }
-    async getUsuarioVersion() {
+    async getVersion() {
         return {
-            entity: 'Usuario',
+            entity: 'Usuarios',
             version: '1.0.0',
-            description: 'CRUD de Usuario',
+            description: 'CRUD de Usuarios',
         };
     }
 
@@ -55,7 +55,7 @@ module.exports = class Usuario {
         return this.usuarioDao.getById({ codigo });
     }
 
-    async updateUsuario({ codigo, email, nombre, avatar, password, estado }) {
+    async updateUsuario({ nombre, avatar, password, estado, codigo }) {
         const result = await this.usuarioDao.updateOne({
             codigo,
             nombre,
@@ -64,19 +64,19 @@ module.exports = class Usuario {
             estado,
         });
         return {
-            id: codigo,
-            name: nombre,
-            avatar: avatar,
-            status: estado,
+            nombre,
+            avatar,
+            estado,
+            codigo,
             modified: result,
         };
     }
 
     async deleteUsuario({ codigo }) {
-        const userToDelete = await this.usuarioDao.getById({ codigo });
+        const usuarioToDelete = await this.usuarioDao.getById({ codigo });
         const result = await this.usuarioDao.deleteOne({ codigo });
         return {
-            ...userToDelete,
+            ...usuarioToDelete,
             deleted: result.changes,
         };
     }

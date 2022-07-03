@@ -4,6 +4,9 @@ const Usuario = require('../../../../libs/usuarios');
 const UsuarioDao = require('../../../../dao/mongodb/models/UsuarioDao');
 const userDao = new UsuarioDao();
 const user = new Usuario(userDao);
+const servidorCorreo = require('../../../../config/nodemailer');
+const { generarPassword } = require('../../../../helpers');
+
 user.init();
 
 const { jwtSign } = require('../../../../libs/security');
@@ -63,6 +66,53 @@ router.post('/signin', async (req, res) => {
     } catch (ex) {
         console.error('security signIn: ', ex);
         return res.status(502).json({ error: 'Error al procesar solicitud' });
+    }
+});
+
+router.post('/olvide-password', async (req, res) => {
+    const { email } = req.body;
+
+    if (/^\s*$/.test(email)) {
+        return res.status(400).json({
+            error: 'Se espera valor de email',
+        });
+    }
+
+    //comprobando que el usuario exista
+    const usuarioExiste = await user.getUsuarioByEmail({ email });
+
+    if (!usuarioExiste) {
+        const error = new Error('El usuario no existe');
+        return res.status(404).json({ msg: error.message });
+    }
+
+    const passwordTemporal = generarPassword();
+
+    try {
+        const transporter = await servidorCorreo();
+
+        await user.updateUsuario({
+            codigo: usuarioExiste._id,
+            email: usuarioExiste.email,
+            nombre: usuarioExiste.nombre,
+            avatar: usuarioExiste.avatar,
+            password: passwordTemporal,
+            estado: usuarioExiste.estado,
+        });
+
+        await transporter.sendMail({
+            from: process.env.correo_app, // sender address
+            to: usuarioExiste.email, // list of receivers
+            subject: 'Cambio de contraseña ✔', // Subject line
+            text: 'Ochenta App', // plain text body
+            html: `Tu nueva contraseña temporar es: ${passwordTemporal}`, // html body
+        });
+
+        res.json({
+            msg: `Hemos enviado un correo a la direccion ${usuarioExiste.email} con las instrucciones`,
+        });
+    } catch (error) {
+        console.log(error);
     }
 });
 

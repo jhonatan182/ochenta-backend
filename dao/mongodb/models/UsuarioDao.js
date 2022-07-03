@@ -9,13 +9,13 @@ module.exports = class UsuarioDao extends DaoObject {
     async setup() {
         if (process.env.MONGODB_SETUP) {
             //TODO agregar algunos indices
-            // const indexExists = await this.collection.indexExists('email_1');
-            // if (!indexExists) {
-            //     await this.collection.createIndex(
-            //         { email: 1 },
-            //         { unique: true }
-            //     );
-            // }
+            const indexExists = await this.collection.indexExists('email_1');
+            if (!indexExists) {
+                await this.collection.createIndex(
+                    { email: 1 },
+                    { unique: true }
+                );
+            }
         }
     }
 
@@ -27,25 +27,29 @@ module.exports = class UsuarioDao extends DaoObject {
         return this.findById(codigo);
     }
 
+    getByEmail({ email }) {
+        return this.findOne({ email });
+    }
+
     insertOne({ email, password, nombre, avatar, estado }) {
-        return super.insertOne({
+        const newUser = {
             email,
             password,
             nombre,
             avatar,
             estado,
             created: new Date().toISOString(),
-        });
+        };
+        return super.insertOne(newUser);
     }
 
-    updateOne({ codigo, email, password, nombre, avatar, estado }) {
+    updateOne({ codigo, password, nombre, avatar, estado }) {
         const updateCommand = {
             $set: {
-                email,
-                password,
                 nombre,
-                estado,
+                password,
                 avatar,
+                estado,
                 updated: new Date().toISOString(),
             },
         };
@@ -53,6 +57,12 @@ module.exports = class UsuarioDao extends DaoObject {
     }
 
     deleteOne({ codigo }) {
-        return super.removeOne(codigo);
+        const updateCommand = {
+            $set: {
+                estado: 'INA',
+                updated: new Date().toISOString(),
+            },
+        };
+        return super.updateOne(codigo, updateCommand);
     }
 };

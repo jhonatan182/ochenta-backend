@@ -58,6 +58,13 @@ module.exports = class DaoObject {
         else return this.collection.find(query, options).toArray();
     }
 
+    findOne(query = {}, projection = null) {
+        const options = {
+            projection,
+        };
+        return this.collection.findOne(query, options);
+    }
+
     findById(_id) {
         const queryId = { _id: new ObjectId(_id) };
         return this.collection.findOne(queryId);

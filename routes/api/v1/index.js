@@ -12,7 +12,7 @@ const { jwtAuthorizer } = require('./middlewares/jwtAuthorizer');
 
 //router.use('/categories', categoriesRoutes);
 router.use('/categories', authorizer, jwtAuthorizer, categoriesRoutes);
-router.use('/usuarios', rutasUsuarios);
+router.use('/usuarios', authorizer, rutasUsuarios);
 router.use('/gastos', rutasUsuarios);
 router.use('/cashflow', authorizer, jwtAuthorizer, cashflowRoutes);
 
